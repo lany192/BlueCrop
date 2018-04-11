@@ -37,9 +37,7 @@ import java.util.List;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 
-/**
- * Created by Oleksii Shliama (https://github.com/shliama).
- */
+
 public class ResultActivity extends BaseActivity {
 
     private static final String TAG = "ResultActivity";

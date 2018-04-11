@@ -1,6 +1,7 @@
 package com.yalantis.ucrop.sample;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,20 +29,26 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.lany.picker.RxPicker;
+import com.lany.picker.bean.ImageItem;
+import com.lany.picker.utils.ImageLoader;
 import com.yalantis.ucrop.UCrop;
 import com.yalantis.ucrop.UCropActivity;
 import com.yalantis.ucrop.UCropFragment;
 import com.yalantis.ucrop.UCropFragmentCallback;
 
 import java.io.File;
-import java.util.Locale;
-import java.util.Random;
+import java.util.List;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
@@ -83,6 +90,14 @@ public class SampleActivity extends BaseActivity implements UCropFragmentCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+        RxPicker.init(new ImageLoader() {
+
+            @Override
+            public void display(ImageView imageView, String path, int width, int height) {
+                Glide.with(imageView.getContext()).load(path).error(R.drawable.ic_preview_image).centerCrop().override(width, height).into(imageView);
+            }
+        });
+
         setupUI();
     }
 
@@ -124,22 +139,16 @@ public class SampleActivity extends BaseActivity implements UCropFragmentCallbac
     @SuppressWarnings("ConstantConditions")
     private void setupUI() {
         findViewById(R.id.button_crop).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("CheckResult")
             @Override
             public void onClick(View v) {
-                pickFromGallery();
-            }
-        });
-        findViewById(R.id.button_random_image).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Random random = new Random();
-                int minSizePixels = 800;
-                int maxSizePixels = 2400;
-                Uri uri = Uri.parse(String.format(Locale.getDefault(), "https://unsplash.it/%d/%d/?random",
-                        minSizePixels + random.nextInt(maxSizePixels - minSizePixels),
-                        minSizePixels + random.nextInt(maxSizePixels - minSizePixels)));
-
-                startCrop(uri);
+                RxPicker.of().single(true).start(SampleActivity.this).subscribe(new Consumer<List<ImageItem>>() {
+                    @Override
+                    public void accept(@NonNull List<ImageItem> imageItems) {
+                        Uri sourceUri = Uri.fromFile(new File(imageItems.get(0).getPath()));
+                        startCrop(sourceUri);
+                    }
+                });
             }
         });
         settingsView = findViewById(R.id.settings);
