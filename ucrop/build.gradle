@@ -26,8 +26,6 @@ android {
         abortOnError false
     }
 
-    resourcePrefix 'ucrop_'
-
     sourceSets.main {
         jni.srcDirs = []
     }
@@ -35,6 +33,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.squareup.okhttp3:okhttp:3.9.0'
 }
