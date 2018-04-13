@@ -1,24 +1,15 @@
 package com.yalantis.ucrop.sample;
 
-import android.Manifest;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -32,17 +23,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
-import java.util.List;
 
-import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
-import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-
-
-public class ResultActivity extends BaseActivity {
-
+public class ResultActivity extends AppCompatActivity {
     private static final String TAG = "ResultActivity";
-    private static final String CHANNEL_ID = "3000";
-    private static final int DOWNLOAD_NOTIFICATION_ID_DONE = 911;
 
     public static void startWithUri(@NonNull Context context, @NonNull Uri uri) {
         Intent intent = new Intent(context, ResultActivity.class);
@@ -96,40 +79,17 @@ public class ResultActivity extends BaseActivity {
     }
 
 
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_STORAGE_WRITE_ACCESS_PERMISSION:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    saveCroppedImage();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-    }
-
     private void saveCroppedImage() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    getString(R.string.permission_write_storage_rationale),
-                    REQUEST_STORAGE_WRITE_ACCESS_PERMISSION);
-        } else {
-            Uri imageUri = getIntent().getData();
-            if (imageUri != null && imageUri.getScheme().equals("file")) {
-                try {
-                    copyFileToDownloads(getIntent().getData());
-                } catch (Exception e) {
-                    Toast.makeText(ResultActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, imageUri.toString(), e);
-                }
-            } else {
-                Toast.makeText(ResultActivity.this, getString(R.string.toast_unexpected_error), Toast.LENGTH_SHORT).show();
+        Uri imageUri = getIntent().getData();
+        if (imageUri != null && imageUri.getScheme().equals("file")) {
+            try {
+                copyFileToDownloads(getIntent().getData());
+            } catch (Exception e) {
+                Toast.makeText(ResultActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, imageUri.toString(), e);
             }
+        } else {
+            Toast.makeText(ResultActivity.this, getString(R.string.toast_unexpected_error), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -146,59 +106,7 @@ public class ResultActivity extends BaseActivity {
         inChannel.transferTo(0, inChannel.size(), outChannel);
         inStream.close();
         outStream.close();
-
-        showNotification(saveFile);
         Toast.makeText(this, R.string.notification_image_saved, Toast.LENGTH_SHORT).show();
         finish();
     }
-
-    private void showNotification(@NonNull File file) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Uri fileUri = FileProvider.getUriForFile(
-                this,
-                getString(R.string.file_provider_authorities),
-                file);
-
-        intent.setDataAndType(fileUri, "image/*");
-
-        List<ResolveInfo> resInfoList = getPackageManager().queryIntentActivities(
-                intent,
-                PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo info : resInfoList) {
-            grantUriPermission(
-                    info.activityInfo.packageName,
-                    fileUri, FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_READ_URI_PERMISSION);
-        }
-
-        NotificationCompat.Builder notificationBuilder;
-        NotificationManager notificationManager = (NotificationManager) this
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_LOW;
-            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, getString(R.string.channel_name), importance);
-            mChannel.setDescription(getString(R.string.channel_description));
-            mChannel.enableLights(true);
-            mChannel.setLightColor(Color.YELLOW);
-            if (notificationManager != null) {
-                notificationManager.createNotificationChannel(mChannel);
-            }
-            notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
-        } else {
-            notificationBuilder = new NotificationCompat.Builder(this);
-        }
-
-        notificationBuilder
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.notification_image_saved_click_to_preview))
-                .setTicker(getString(R.string.notification_image_saved))
-                .setSmallIcon(R.drawable.ic_done)
-                .setOngoing(false)
-                .setContentIntent(PendingIntent.getActivity(this, 0, intent, 0))
-                .setAutoCancel(true);
-        if (notificationManager != null) {
-            notificationManager.notify(DOWNLOAD_NOTIFICATION_ID_DONE, notificationBuilder.build());
-        }
-    }
-
 }
