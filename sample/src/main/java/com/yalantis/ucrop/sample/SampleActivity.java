@@ -30,7 +30,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +38,6 @@ import com.lany.picker.RxPicker;
 import com.lany.picker.bean.ImageItem;
 import com.lany.picker.utils.ImageLoader;
 import com.yalantis.ucrop.UCrop;
-import com.yalantis.ucrop.UCropActivity;
 import com.yalantis.ucrop.UCropFragment;
 import com.yalantis.ucrop.UCropFragmentCallback;
 
@@ -53,14 +51,11 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
     private static final int REQUEST_SELECT_PICTURE_FOR_FRAGMENT = 0x02;
     private static final String SAMPLE_CROPPED_IMAGE_NAME = "SampleCropImage";
 
-    private RadioGroup mRadioGroupAspectRatio, mRadioGroupCompressionSettings;
+    private RadioGroup mRadioGroupAspectRatio;
     private EditText mEditTextMaxWidth, mEditTextMaxHeight;
     private EditText mEditTextRatioX, mEditTextRatioY;
     private CheckBox mCheckBoxMaxSize;
-    private SeekBar mSeekBarQuality;
-    private TextView mTextViewQuality;
     private CheckBox mCheckBoxHideBottomControls;
-    private CheckBox mCheckBoxFreeStyleCrop;
     private Toolbar toolbar;
     private ScrollView settingsView;
     private int requestMode = BuildConfig.RequestMode;
@@ -129,45 +124,16 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
         });
         settingsView = findViewById(R.id.settings);
         mRadioGroupAspectRatio = findViewById(R.id.radio_group_aspect_ratio);
-        mRadioGroupCompressionSettings = findViewById(R.id.radio_group_compression_settings);
         mCheckBoxMaxSize = findViewById(R.id.checkbox_max_size);
         mEditTextRatioX = findViewById(R.id.edit_text_ratio_x);
         mEditTextRatioY = findViewById(R.id.edit_text_ratio_y);
         mEditTextMaxWidth = findViewById(R.id.edit_text_max_width);
         mEditTextMaxHeight = findViewById(R.id.edit_text_max_height);
-        mSeekBarQuality = findViewById(R.id.seekbar_quality);
-        mTextViewQuality = findViewById(R.id.text_view_quality);
         mCheckBoxHideBottomControls = findViewById(R.id.checkbox_hide_bottom_controls);
-        mCheckBoxFreeStyleCrop = findViewById(R.id.checkbox_freestyle_crop);
 
         mRadioGroupAspectRatio.check(R.id.radio_dynamic);
         mEditTextRatioX.addTextChangedListener(mAspectRatioTextWatcher);
         mEditTextRatioY.addTextChangedListener(mAspectRatioTextWatcher);
-        mRadioGroupCompressionSettings.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                mSeekBarQuality.setEnabled(checkedId == R.id.radio_jpeg);
-            }
-        });
-        mRadioGroupCompressionSettings.check(R.id.radio_jpeg);
-        mSeekBarQuality.setProgress(UCropActivity.DEFAULT_COMPRESS_QUALITY);
-        mTextViewQuality.setText(String.format(getString(R.string.format_quality_d), mSeekBarQuality.getProgress()));
-        mSeekBarQuality.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mTextViewQuality.setText(String.format(getString(R.string.format_quality_d), progress));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-        });
 
         mEditTextMaxHeight.addTextChangedListener(mMaxSizeTextWatcher);
         mEditTextMaxWidth.addTextChangedListener(mMaxSizeTextWatcher);
@@ -213,15 +179,7 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
 
     private void startCrop(@NonNull Uri uri) {
         String destinationFileName = SAMPLE_CROPPED_IMAGE_NAME;
-        switch (mRadioGroupCompressionSettings.getCheckedRadioButtonId()) {
-            case R.id.radio_png:
-                destinationFileName += ".png";
-                break;
-            case R.id.radio_jpeg:
-                destinationFileName += ".jpg";
-                break;
-        }
-
+        destinationFileName += ".jpg";
         UCrop uCrop = UCrop.of(uri, Uri.fromFile(new File(getCacheDir(), destinationFileName)));
 
         uCrop = basisConfig(uCrop);
@@ -288,20 +246,11 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
      */
     private UCrop advancedConfig(@NonNull UCrop uCrop) {
         UCrop.Options options = new UCrop.Options();
-
-        switch (mRadioGroupCompressionSettings.getCheckedRadioButtonId()) {
-            case R.id.radio_png:
-                options.setCompressionFormat(Bitmap.CompressFormat.PNG);
-                break;
-            case R.id.radio_jpeg:
-            default:
-                options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
-                break;
-        }
-        options.setCompressionQuality(mSeekBarQuality.getProgress());
-
+        options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
+        //压缩质量0~100
+        options.setCompressionQuality(100);
         options.setHideBottomControls(mCheckBoxHideBottomControls.isChecked());
-        options.setFreeStyleCropEnabled(mCheckBoxFreeStyleCrop.isChecked());
+        options.setFreeStyleCropEnabled(true);
 
         /*
         If you want to configure how gestures work for all UCropActivity tabs
