@@ -1,7 +1,22 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/ucrop_photobox"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.yalantis.ucrop.view.UCropView
+        android:id="@+id/ucrop"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:alpha="0" />
+
+    <LinearLayout
+        android:id="@+id/layout_aspect_ratio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/ucrop_color_widget_background"
+        android:gravity="center"
+        android:orientation="horizontal" />
 
     <LinearLayout
         android:id="@+id/toolbar"
@@ -28,21 +43,4 @@
             android:textColor="@android:color/white"
             android:textSize="14sp" />
     </LinearLayout>
-
-    <FrameLayout
-        android:id="@+id/ucrop_frame"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/wrapper_controls"
-        android:layout_below="@+id/toolbar"
-        android:background="@color/ucrop_color_crop_background">
-
-        <com.yalantis.ucrop.view.UCropView
-            android:id="@+id/ucrop"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:alpha="0" />
-
-    </FrameLayout>
-
-</RelativeLayout>
+</LinearLayout>

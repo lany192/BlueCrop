@@ -1,36 +1,20 @@
 package com.yalantis.ucrop.sample;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.ColorInt;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -38,40 +22,19 @@ import com.lany.picker.RxPicker;
 import com.lany.picker.bean.ImageItem;
 import com.lany.picker.utils.ImageLoader;
 import com.yalantis.ucrop.UCrop;
-import com.yalantis.ucrop.UCropFragment;
-import com.yalantis.ucrop.UCropFragmentCallback;
 
 import java.io.File;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
 
-public class SampleActivity extends AppCompatActivity implements UCropFragmentCallback {
+public class SampleActivity extends AppCompatActivity {
     private static final String TAG = "SampleActivity";
-    private static final int REQUEST_SELECT_PICTURE_FOR_FRAGMENT = 0x02;
     private static final String SAMPLE_CROPPED_IMAGE_NAME = "SampleCropImage";
-
     private RadioGroup mRadioGroupAspectRatio;
     private EditText mEditTextMaxWidth, mEditTextMaxHeight;
     private EditText mEditTextRatioX, mEditTextRatioY;
     private CheckBox mCheckBoxMaxSize;
-    private CheckBox mCheckBoxHideBottomControls;
-    private Toolbar toolbar;
-    private ScrollView settingsView;
-    private int requestMode = BuildConfig.RequestMode;
-
-    private UCropFragment fragment;
-    private boolean mShowLoader;
-
-    private String mToolbarTitle;
-    @DrawableRes
-    private int mToolbarCancelDrawable;
-    @DrawableRes
-    private int mToolbarCropDrawable;
-    // Enables dynamic coloring
-    private int mToolbarColor;
-    private int mStatusBarColor;
-    private int mToolbarWidgetColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,21 +47,13 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
                 Glide.with(imageView.getContext()).load(path).error(R.drawable.ic_preview_image).centerCrop().override(width, height).into(imageView);
             }
         });
-
         setupUI();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode == requestMode) {
-                final Uri selectedUri = data.getData();
-                if (selectedUri != null) {
-                    startCrop(selectedUri);
-                } else {
-                    Toast.makeText(SampleActivity.this, R.string.toast_cannot_retrieve_selected_image, Toast.LENGTH_SHORT).show();
-                }
-            } else if (requestCode == UCrop.REQUEST_CROP) {
+            if (requestCode == UCrop.REQUEST_CROP) {
                 handleCropResult(data);
             }
         }
@@ -122,14 +77,12 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
                 });
             }
         });
-        settingsView = findViewById(R.id.settings);
         mRadioGroupAspectRatio = findViewById(R.id.radio_group_aspect_ratio);
         mCheckBoxMaxSize = findViewById(R.id.checkbox_max_size);
         mEditTextRatioX = findViewById(R.id.edit_text_ratio_x);
         mEditTextRatioY = findViewById(R.id.edit_text_ratio_y);
         mEditTextMaxWidth = findViewById(R.id.edit_text_max_width);
         mEditTextMaxHeight = findViewById(R.id.edit_text_max_height);
-        mCheckBoxHideBottomControls = findViewById(R.id.checkbox_hide_bottom_controls);
 
         mRadioGroupAspectRatio.check(R.id.radio_dynamic);
         mEditTextRatioX.addTextChangedListener(mAspectRatioTextWatcher);
@@ -185,11 +138,7 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
         uCrop = basisConfig(uCrop);
         uCrop = advancedConfig(uCrop);
 
-        if (requestMode == REQUEST_SELECT_PICTURE_FOR_FRAGMENT) {       //if build variant = fragment
-            setupFragment(uCrop);
-        } else {                                                        // else start uCrop Activity
-            uCrop.start(SampleActivity.this);
-        }
+        uCrop.start(SampleActivity.this);
 
     }
 
@@ -249,7 +198,6 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
         options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
         //压缩质量0~100
         options.setCompressionQuality(100);
-        options.setHideBottomControls(mCheckBoxHideBottomControls.isChecked());
         options.setFreeStyleCropEnabled(true);
 
         /*
@@ -313,149 +261,5 @@ public class SampleActivity extends AppCompatActivity implements UCropFragmentCa
         } else {
             Toast.makeText(SampleActivity.this, R.string.toast_unexpected_error, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    @Override
-    public void loadingProgress(boolean showLoader) {
-        mShowLoader = showLoader;
-        supportInvalidateOptionsMenu();
-    }
-
-    @Override
-    public void onCropFinish(UCropFragment.UCropResult result) {
-        switch (result.mResultCode) {
-            case RESULT_OK:
-                handleCropResult(result.mResultData);
-                break;
-            case UCrop.RESULT_ERROR:
-                handleCropError(result.mResultData);
-                break;
-        }
-        removeFragmentFromScreen();
-    }
-
-    public void removeFragmentFromScreen() {
-        getSupportFragmentManager().beginTransaction()
-                .remove(fragment)
-                .commit();
-        toolbar.setVisibility(View.GONE);
-        settingsView.setVisibility(View.VISIBLE);
-    }
-
-    public void setupFragment(UCrop uCrop) {
-        fragment = uCrop.getFragment(this);
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, fragment, UCropFragment.TAG)
-                .commitAllowingStateLoss();
-
-        setupViews(uCrop.getIntent(this).getExtras());
-    }
-
-    public void setupViews(Bundle args) {
-        settingsView.setVisibility(View.GONE);
-        mStatusBarColor = args.getInt(UCrop.Options.EXTRA_STATUS_BAR_COLOR, ContextCompat.getColor(this, R.color.ucrop_color_statusbar));
-        mToolbarColor = args.getInt(UCrop.Options.EXTRA_TOOL_BAR_COLOR, ContextCompat.getColor(this, R.color.ucrop_color_toolbar));
-        mToolbarCancelDrawable = args.getInt(UCrop.Options.EXTRA_UCROP_WIDGET_CANCEL_DRAWABLE, R.drawable.ucrop_ic_cross);
-        mToolbarCropDrawable = args.getInt(UCrop.Options.EXTRA_UCROP_WIDGET_CROP_DRAWABLE, R.drawable.ucrop_ic_done);
-        mToolbarWidgetColor = args.getInt(UCrop.Options.EXTRA_UCROP_WIDGET_COLOR_TOOLBAR, ContextCompat.getColor(this, R.color.ucrop_color_toolbar_widget));
-        mToolbarTitle = args.getString(UCrop.Options.EXTRA_UCROP_TITLE_TEXT_TOOLBAR);
-        mToolbarTitle = mToolbarTitle != null ? mToolbarTitle : getResources().getString(R.string.ucrop_label_edit_photo);
-
-        setupAppBar();
-    }
-
-    /**
-     * Configures and styles both status bar and toolbar.
-     */
-    private void setupAppBar() {
-        setStatusBarColor(mStatusBarColor);
-
-        toolbar = findViewById(R.id.toolbar);
-
-        // Set all of the Toolbar coloring
-        toolbar.setBackgroundColor(mToolbarColor);
-        toolbar.setTitleTextColor(mToolbarWidgetColor);
-        toolbar.setVisibility(View.VISIBLE);
-        final TextView toolbarTitle = toolbar.findViewById(R.id.toolbar_title);
-        toolbarTitle.setTextColor(mToolbarWidgetColor);
-        toolbarTitle.setText(mToolbarTitle);
-
-        // Color buttons inside the Toolbar
-        Drawable stateButtonDrawable = ContextCompat.getDrawable(getBaseContext(), mToolbarCancelDrawable);
-        if (stateButtonDrawable != null) {
-            stateButtonDrawable.mutate();
-            stateButtonDrawable.setColorFilter(mToolbarWidgetColor, PorterDuff.Mode.SRC_ATOP);
-            toolbar.setNavigationIcon(stateButtonDrawable);
-        }
-
-        setSupportActionBar(toolbar);
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false);
-        }
-    }
-
-    /**
-     * Sets status-bar color for L devices.
-     *
-     * @param color - status-bar color
-     */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void setStatusBarColor(@ColorInt int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            final Window window = getWindow();
-            if (window != null) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(color);
-            }
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.ucrop_menu_activity, menu);
-
-        // Change crop & loader menu icons color to match the rest of the UI colors
-
-        MenuItem menuItemLoader = menu.findItem(R.id.menu_loader);
-        Drawable menuItemLoaderIcon = menuItemLoader.getIcon();
-        if (menuItemLoaderIcon != null) {
-            try {
-                menuItemLoaderIcon.mutate();
-                menuItemLoaderIcon.setColorFilter(mToolbarWidgetColor, PorterDuff.Mode.SRC_ATOP);
-                menuItemLoader.setIcon(menuItemLoaderIcon);
-            } catch (IllegalStateException e) {
-                Log.i(this.getClass().getName(), String.format("%s - %s", e.getMessage(), getString(R.string.ucrop_mutate_exception_hint)));
-            }
-            ((Animatable) menuItemLoader.getIcon()).start();
-        }
-
-        MenuItem menuItemCrop = menu.findItem(R.id.menu_crop);
-        Drawable menuItemCropIcon = ContextCompat.getDrawable(this, mToolbarCropDrawable);
-        if (menuItemCropIcon != null) {
-            menuItemCropIcon.mutate();
-            menuItemCropIcon.setColorFilter(mToolbarWidgetColor, PorterDuff.Mode.SRC_ATOP);
-            menuItemCrop.setIcon(menuItemCropIcon);
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.menu_crop).setVisible(!mShowLoader);
-        menu.findItem(R.id.menu_loader).setVisible(mShowLoader);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_crop) {
-            if (fragment.isAdded())
-                fragment.cropAndSaveImage();
-        } else if (item.getItemId() == android.R.id.home) {
-            removeFragmentFromScreen();
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

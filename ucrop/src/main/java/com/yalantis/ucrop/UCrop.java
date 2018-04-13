@@ -23,11 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Created by Oleksii Shliama (https://github.com/shliama).
- * <p/>
- * Builder class to ease Intent setup.
- */
 public class UCrop {
 
     public static final int REQUEST_CROP = 69;
@@ -189,20 +184,6 @@ public class UCrop {
     }
 
     /**
-     * Get Fragment {@link UCropFragment}
-     *
-     * @return Fragment of {@link UCropFragment}
-     */
-    public UCropFragment getFragment(UCropFragmentCallback callback) {
-        return UCropFragment.newInstance(mCropOptionsBundle, callback);
-    }
-
-    public UCropFragment getFragment(Bundle bundle, UCropFragmentCallback callback) {
-        mCropOptionsBundle = bundle;
-        return getFragment(callback);
-    }
-
-    /**
      * Retrieve cropped image Uri from the result Intent
      *
      * @param intent crop result intent
@@ -261,8 +242,6 @@ public class UCrop {
         public static final String EXTRA_COMPRESSION_FORMAT_NAME = EXTRA_PREFIX + ".CompressionFormatName";
         public static final String EXTRA_COMPRESSION_QUALITY = EXTRA_PREFIX + ".CompressionQuality";
 
-        public static final String EXTRA_ALLOWED_GESTURES = EXTRA_PREFIX + ".AllowedGestures";
-
         public static final String EXTRA_MAX_BITMAP_SIZE = EXTRA_PREFIX + ".MaxBitmapSize";
         public static final String EXTRA_MAX_SCALE_MULTIPLIER = EXTRA_PREFIX + ".MaxScaleMultiplier";
         public static final String EXTRA_IMAGE_TO_CROP_BOUNDS_ANIM_DURATION = EXTRA_PREFIX + ".ImageToCropBoundsAnimDuration";
@@ -284,21 +263,10 @@ public class UCrop {
         public static final String EXTRA_STATUS_BAR_COLOR = EXTRA_PREFIX + ".StatusBarColor";
         public static final String EXTRA_UCROP_COLOR_WIDGET_ACTIVE = EXTRA_PREFIX + ".UcropColorWidgetActive";
 
-        public static final String EXTRA_UCROP_WIDGET_COLOR_TOOLBAR = EXTRA_PREFIX + ".UcropToolbarWidgetColor";
-        public static final String EXTRA_UCROP_TITLE_TEXT_TOOLBAR = EXTRA_PREFIX + ".UcropToolbarTitleText";
-        public static final String EXTRA_UCROP_WIDGET_CANCEL_DRAWABLE = EXTRA_PREFIX + ".UcropToolbarCancelDrawable";
-        public static final String EXTRA_UCROP_WIDGET_CROP_DRAWABLE = EXTRA_PREFIX + ".UcropToolbarCropDrawable";
-
-        public static final String EXTRA_UCROP_LOGO_COLOR = EXTRA_PREFIX + ".UcropLogoColor";
-
-        public static final String EXTRA_HIDE_BOTTOM_CONTROLS = EXTRA_PREFIX + ".HideBottomControls";
         public static final String EXTRA_FREE_STYLE_CROP = EXTRA_PREFIX + ".FreeStyleCrop";
 
         public static final String EXTRA_ASPECT_RATIO_SELECTED_BY_DEFAULT = EXTRA_PREFIX + ".AspectRatioSelectedByDefault";
         public static final String EXTRA_ASPECT_RATIO_OPTIONS = EXTRA_PREFIX + ".AspectRatioOptions";
-
-        public static final String EXTRA_UCROP_ROOT_VIEW_BACKGROUND_COLOR = EXTRA_PREFIX + ".UcropRootViewBackgroundColor";
-
 
         private final Bundle mOptionBundle;
 
@@ -323,15 +291,6 @@ public class UCrop {
          */
         public void setCompressionQuality(@IntRange(from = 0) int compressQuality) {
             mOptionBundle.putInt(EXTRA_COMPRESSION_QUALITY, compressQuality);
-        }
-
-        /**
-         * Choose what set of gestures will be enabled on each tab - if any.
-         */
-        public void setAllowedGestures(@UCropActivity.GestureTypes int tabScale,
-                                       @UCropActivity.GestureTypes int tabRotate,
-                                       @UCropActivity.GestureTypes int tabAspectRatio) {
-            mOptionBundle.putIntArray(EXTRA_ALLOWED_GESTURES, new int[]{tabScale, tabRotate, tabAspectRatio});
         }
 
         /**
@@ -453,48 +412,6 @@ public class UCrop {
         }
 
         /**
-         * @param color - desired resolved color of Toolbar text and buttons (default is darker orange)
-         */
-        public void setToolbarWidgetColor(@ColorInt int color) {
-            mOptionBundle.putInt(EXTRA_UCROP_WIDGET_COLOR_TOOLBAR, color);
-        }
-
-        /**
-         * @param text - desired text for Toolbar title
-         */
-        public void setToolbarTitle(@Nullable String text) {
-            mOptionBundle.putString(EXTRA_UCROP_TITLE_TEXT_TOOLBAR, text);
-        }
-
-        /**
-         * @param drawable - desired drawable for the Toolbar left cancel icon
-         */
-        public void setToolbarCancelDrawable(@DrawableRes int drawable) {
-            mOptionBundle.putInt(EXTRA_UCROP_WIDGET_CANCEL_DRAWABLE, drawable);
-        }
-
-        /**
-         * @param drawable - desired drawable for the Toolbar right crop icon
-         */
-        public void setToolbarCropDrawable(@DrawableRes int drawable) {
-            mOptionBundle.putInt(EXTRA_UCROP_WIDGET_CROP_DRAWABLE, drawable);
-        }
-
-        /**
-         * @param color - desired resolved color of logo fill (default is darker grey)
-         */
-        public void setLogoColor(@ColorInt int color) {
-            mOptionBundle.putInt(EXTRA_UCROP_LOGO_COLOR, color);
-        }
-
-        /**
-         * @param hide - set to true to hide the bottom controls (shown by default)
-         */
-        public void setHideBottomControls(boolean hide) {
-            mOptionBundle.putBoolean(EXTRA_HIDE_BOTTOM_CONTROLS, hide);
-        }
-
-        /**
          * @param enabled - set to true to let user resize crop bounds (disabled by default)
          */
         public void setFreeStyleCropEnabled(boolean enabled) {
@@ -515,13 +432,6 @@ public class UCrop {
             }
             mOptionBundle.putInt(EXTRA_ASPECT_RATIO_SELECTED_BY_DEFAULT, selectedByDefault);
             mOptionBundle.putParcelableArrayList(EXTRA_ASPECT_RATIO_OPTIONS, new ArrayList<Parcelable>(Arrays.asList(aspectRatio)));
-        }
-
-        /**
-         * @param color - desired background color that should be applied to the root view
-         */
-        public void setRootViewBackgroundColor(@ColorInt int color) {
-            mOptionBundle.putInt(EXTRA_UCROP_ROOT_VIEW_BACKGROUND_COLOR, color);
         }
 
         /**
