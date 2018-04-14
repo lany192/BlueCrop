@@ -13,9 +13,8 @@ import com.yalantis.ucrop.callback.CropBoundsChangeListener;
 import com.yalantis.ucrop.callback.OverlayViewChangeListener;
 
 public class UCropView extends FrameLayout {
-
-    private GestureCropImageView mGestureCropImageView;
-    private final OverlayView mViewOverlay;
+    private CropImageView mCropImageView;
+    private final OverlayView mOverlayView;
 
     public UCropView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -23,14 +22,13 @@ public class UCropView extends FrameLayout {
 
     public UCropView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
         LayoutInflater.from(context).inflate(R.layout.ucrop_view, this, true);
-        mGestureCropImageView = (GestureCropImageView) findViewById(R.id.image_view_crop);
-        mViewOverlay = (OverlayView) findViewById(R.id.view_overlay);
+        mCropImageView = findViewById(R.id.image_view_crop);
+        mOverlayView = findViewById(R.id.view_overlay);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_UCropView);
-        mViewOverlay.processStyledAttributes(a);
-        mGestureCropImageView.processStyledAttributes(a);
+        mOverlayView.processStyledAttributes(a);
+        mCropImageView.processStyledAttributes(a);
         a.recycle();
 
 
@@ -38,16 +36,16 @@ public class UCropView extends FrameLayout {
     }
 
     private void setListenersToViews() {
-        mGestureCropImageView.setCropBoundsChangeListener(new CropBoundsChangeListener() {
+        mCropImageView.setCropBoundsChangeListener(new CropBoundsChangeListener() {
             @Override
             public void onCropAspectRatioChanged(float cropRatio) {
-                mViewOverlay.setTargetAspectRatio(cropRatio);
+                mOverlayView.setTargetAspectRatio(cropRatio);
             }
         });
-        mViewOverlay.setOverlayViewChangeListener(new OverlayViewChangeListener() {
+        mOverlayView.setOverlayViewChangeListener(new OverlayViewChangeListener() {
             @Override
             public void onCropRectUpdated(RectF cropRect) {
-                mGestureCropImageView.setCropRect(cropRect);
+                mCropImageView.setCropRect(cropRect);
             }
         });
     }
@@ -58,13 +56,13 @@ public class UCropView extends FrameLayout {
     }
 
     @NonNull
-    public GestureCropImageView getCropImageView() {
-        return mGestureCropImageView;
+    public CropImageView getCropImageView() {
+        return mCropImageView;
     }
 
     @NonNull
     public OverlayView getOverlayView() {
-        return mViewOverlay;
+        return mOverlayView;
     }
 
     /**
@@ -72,10 +70,10 @@ public class UCropView extends FrameLayout {
      * Be careful: this method recreate UCropImageView instance and reattach it to layout.
      */
     public void resetCropImageView() {
-        removeView(mGestureCropImageView);
-        mGestureCropImageView = new GestureCropImageView(getContext());
+        removeView(mCropImageView);
+        mCropImageView = new CropImageView(getContext());
         setListenersToViews();
-        mGestureCropImageView.setCropRect(getOverlayView().getCropViewRect());
-        addView(mGestureCropImageView, 0);
+        mCropImageView.setCropRect(getOverlayView().getCropViewRect());
+        addView(mCropImageView, 0);
     }
 }

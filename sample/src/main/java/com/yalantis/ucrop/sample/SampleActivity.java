@@ -199,47 +199,6 @@ public class SampleActivity extends AppCompatActivity {
         //压缩质量0~100
         options.setCompressionQuality(100);
         options.setFreeStyleCropEnabled(true);
-
-        /*
-        If you want to configure how gestures work for all UCropActivity tabs
-
-        options.setAllowedGestures(UCropActivity.SCALE, UCropActivity.ROTATE, UCropActivity.ALL);
-        * */
-
-        /*
-        This sets max size for bitmap that will be decoded from source Uri.
-        More size - more memory allocation, default implementation uses screen diagonal.
-
-        options.setMaxBitmapSize(640);
-        * */
-
-
-       /*
-
-        Tune everything (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧
-
-        options.setMaxScaleMultiplier(5);
-        options.setImageToCropBoundsAnimDuration(666);
-        options.setDimmedLayerColor(Color.CYAN);
-        options.setCircleDimmedLayer(true);
-        options.setShowCropFrame(false);
-        options.setCropGridStrokeWidth(20);
-        options.setCropGridColor(Color.GREEN);
-        options.setCropGridColumnCount(2);
-        options.setCropGridRowCount(1);
-        options.setToolbarCropDrawable(R.drawable.your_crop_icon);
-        options.setToolbarCancelDrawable(R.drawable.your_cancel_icon);
-
-        // Aspect ratio options
-        options.setAspectRatioOptions(1,
-            new AspectRatio("WOW", 1, 2),
-            new AspectRatio("MUCH", 3, 4),
-            new AspectRatio("RATIO", CropImageView.DEFAULT_ASPECT_RATIO, CropImageView.DEFAULT_ASPECT_RATIO),
-            new AspectRatio("SO", 16, 9),
-            new AspectRatio("ASPECT", 1, 1));
-
-       */
-
         return uCrop.withOptions(options);
     }
 
