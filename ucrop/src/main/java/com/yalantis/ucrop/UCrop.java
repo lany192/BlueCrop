@@ -263,8 +263,6 @@ public class UCrop {
         public static final String EXTRA_STATUS_BAR_COLOR = EXTRA_PREFIX + ".StatusBarColor";
         public static final String EXTRA_UCROP_COLOR_WIDGET_ACTIVE = EXTRA_PREFIX + ".UcropColorWidgetActive";
 
-        public static final String EXTRA_FREE_STYLE_CROP = EXTRA_PREFIX + ".FreeStyleCrop";
-
         public static final String EXTRA_ASPECT_RATIO_SELECTED_BY_DEFAULT = EXTRA_PREFIX + ".AspectRatioSelectedByDefault";
         public static final String EXTRA_ASPECT_RATIO_OPTIONS = EXTRA_PREFIX + ".AspectRatioOptions";
 
@@ -409,13 +407,6 @@ public class UCrop {
          */
         public void setActiveWidgetColor(@ColorInt int color) {
             mOptionBundle.putInt(EXTRA_UCROP_COLOR_WIDGET_ACTIVE, color);
-        }
-
-        /**
-         * @param enabled - set to true to let user resize crop bounds (disabled by default)
-         */
-        public void setFreeStyleCropEnabled(boolean enabled) {
-            mOptionBundle.putBoolean(EXTRA_FREE_STYLE_CROP, enabled);
         }
 
         /**

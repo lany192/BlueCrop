@@ -198,7 +198,6 @@ public class SampleActivity extends AppCompatActivity {
         options.setCompressionFormat(Bitmap.CompressFormat.JPEG);
         //压缩质量0~100
         options.setCompressionQuality(100);
-        options.setFreeStyleCropEnabled(true);
         return uCrop.withOptions(options);
     }
 
