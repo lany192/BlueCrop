@@ -9,7 +9,6 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Build;
 import android.support.annotation.ColorInt;
-import android.support.annotation.IntDef;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
@@ -20,25 +19,13 @@ import com.yalantis.ucrop.R;
 import com.yalantis.ucrop.callback.OverlayViewChangeListener;
 import com.yalantis.ucrop.util.RectUtils;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-/**
- * Created by Oleksii Shliama (https://github.com/shliama).
- * <p/>
- * This view is used for drawing the overlay on top of the image. It may have frame, crop guidelines and dimmed area.
- * This must have LAYER_TYPE_SOFTWARE to draw itself properly.
- */
 public class OverlayView extends View {
-
     public static final int FREESTYLE_CROP_MODE_DISABLE = 0;
     public static final int FREESTYLE_CROP_MODE_ENABLE = 1;
-    public static final int FREESTYLE_CROP_MODE_ENABLE_WITH_PASS_THROUGH = 2;
 
     public static final boolean DEFAULT_SHOW_CROP_FRAME = true;
     public static final boolean DEFAULT_SHOW_CROP_GRID = true;
     public static final boolean DEFAULT_CIRCLE_DIMMED_LAYER = false;
-    public static final int DEFAULT_FREESTYLE_CROP_MODE = FREESTYLE_CROP_MODE_DISABLE;
     public static final int DEFAULT_CROP_GRID_ROW_COUNT = 2;
     public static final int DEFAULT_CROP_GRID_COLUMN_COUNT = 2;
 
@@ -60,8 +47,8 @@ public class OverlayView extends View {
     private Paint mCropGridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mCropFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mCropFrameCornersPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-    @FreestyleMode
-    private int mFreestyleCropMode = DEFAULT_FREESTYLE_CROP_MODE;
+
+    private int mFreestyleCropMode = FREESTYLE_CROP_MODE_DISABLE;
     private float mPreviousTouchX = -1, mPreviousTouchY = -1;
     private int mCurrentTouchCornerIndex = -1;
     private int mTouchPointThreshold;
@@ -91,10 +78,6 @@ public class OverlayView extends View {
         init();
     }
 
-    public OverlayViewChangeListener getOverlayViewChangeListener() {
-        return mCallback;
-    }
-
     public void setOverlayViewChangeListener(OverlayViewChangeListener callback) {
         mCallback = callback;
     }
@@ -104,13 +87,6 @@ public class OverlayView extends View {
         return mCropViewRect;
     }
 
-    @Deprecated
-    /***
-     * Please use the new method {@link #getFreestyleCropMode() getFreestyleCropMode} method as we have more than 1 freestyle crop mode.
-     */
-    public boolean isFreestyleCropEnabled() {
-        return mFreestyleCropMode == FREESTYLE_CROP_MODE_ENABLE;
-    }
 
     @Deprecated
     /***
@@ -118,16 +94,6 @@ public class OverlayView extends View {
      */
     public void setFreestyleCropEnabled() {
         mFreestyleCropMode = FREESTYLE_CROP_MODE_ENABLE;
-    }
-
-    @FreestyleMode
-    public int getFreestyleCropMode() {
-        return mFreestyleCropMode;
-    }
-
-    public void setFreestyleCropMode(@FreestyleMode int mFreestyleCropMode) {
-        this.mFreestyleCropMode = mFreestyleCropMode;
-        postInvalidate();
     }
 
     /**
@@ -257,8 +223,7 @@ public class OverlayView extends View {
 
         mGridPoints = null;
         mCircularPath.reset();
-        mCircularPath.addCircle(mCropViewRect.centerX(), mCropViewRect.centerY(),
-                Math.min(mCropViewRect.width(), mCropViewRect.height()) / 2.f, Path.Direction.CW);
+        mCircularPath.addCircle(mCropViewRect.centerX(), mCropViewRect.centerY(), Math.min(mCropViewRect.width(), mCropViewRect.height()) / 2.f, Path.Direction.CW);
     }
 
     protected void init() {
@@ -421,22 +386,6 @@ public class OverlayView extends View {
         if (mFreestyleCropMode == FREESTYLE_CROP_MODE_ENABLE && closestPointIndex < 0 && mCropViewRect.contains(touchX, touchY)) {
             return 4;
         }
-
-//        for (int i = 0; i <= 8; i += 2) {
-//
-//            double distanceToCorner;
-//            if (i < 8) { // corners
-//                distanceToCorner = Math.sqrt(Math.pow(touchX - mCropGridCorners[i], 2)
-//                        + Math.pow(touchY - mCropGridCorners[i + 1], 2));
-//            } else { // center
-//                distanceToCorner = Math.sqrt(Math.pow(touchX - mCropGridCenter[0], 2)
-//                        + Math.pow(touchY - mCropGridCenter[1], 2));
-//            }
-//            if (distanceToCorner < closestPointDistance) {
-//                closestPointDistance = distanceToCorner;
-//                closestPointIndex = i / 2;
-//            }
-//        }
         return closestPointIndex;
     }
 
@@ -568,11 +517,4 @@ public class OverlayView extends View {
         mCropGridRowCount = a.getInt(R.styleable.ucrop_UCropView_ucrop_grid_row_count, DEFAULT_CROP_GRID_ROW_COUNT);
         mCropGridColumnCount = a.getInt(R.styleable.ucrop_UCropView_ucrop_grid_column_count, DEFAULT_CROP_GRID_COLUMN_COUNT);
     }
-
-
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({FREESTYLE_CROP_MODE_DISABLE, FREESTYLE_CROP_MODE_ENABLE, FREESTYLE_CROP_MODE_ENABLE_WITH_PASS_THROUGH})
-    public @interface FreestyleMode {
-    }
-
 }
