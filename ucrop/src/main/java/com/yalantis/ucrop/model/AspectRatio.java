@@ -4,11 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
-/**
- * Created by Oleksii Shliama [https://github.com/shliama] on 6/24/16.
- */
 public class AspectRatio implements Parcelable {
-
     @Nullable
     private final String mAspectRatioTitle;
     private final float mAspectRatioX;
